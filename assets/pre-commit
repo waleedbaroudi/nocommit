@@ -1,0 +1,58 @@
+#!/bin/sh
+
+RED="\033[31m"
+YELLOW="\033[33m"
+RESET="\033[0m"
+
+PHRASES_FILE="$HOME/.nocommit/phrases.txt"
+CONFIG_FILE="$HOME/.nocommit/config.yaml"
+
+# Ensure phrases file exists
+if [ ! -f "$PHRASES_FILE" ]; then
+    echo "${YELLOW}⚠️ nocommit: phrases file not found at $PHRASES_FILE${RESET}"
+    exit 0
+fi
+
+# Warn if phrases file is empty
+if [ ! -s "$PHRASES_FILE" ]; then
+    echo "${YELLOW}⚠️ nocommit: phrases list is empty — nothing to block${RESET}"
+    exit 0
+fi
+
+# Default: case-insensitive
+CASE_FLAG="-i"
+
+# Check config for case sensitivity setting
+if [ -f "$CONFIG_FILE" ]; then
+    if grep -q "^caseSensitive:[[:space:]]*true" "$CONFIG_FILE"; then
+        CASE_FLAG="" # case-sensitive search
+    fi
+fi
+
+# Get staged files
+FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+# If no staged files, exit
+[ -z "$FILES" ] && exit 0
+
+# Read phrases
+while IFS= read -r phrase; do
+    # Skip empty lines and comments
+    [ -z "$phrase" ] && continue
+    case "$phrase" in \#*) continue ;; esac
+
+    # Search for matches
+    matches=$(grep -n -I $CASE_FLAG -E -- "$phrase" "$FILES" 2>/dev/null)
+    if [ -n "$matches" ]; then
+        echo "${RED}❌ Commit blocked: found '$phrase' in:${RESET}"
+        echo "$matches"
+        echo
+        echo "💡 Did you intend to commit this?"
+        echo "   - Check and adjust your settings with: nocommit config list/set"
+        echo "   - Modify block phrases with: nocommit phrases add/remove/list"
+        echo "   - Temporarily remove the phrase in your code"
+        exit 1
+    fi
+done < "$PHRASES_FILE"
+
+exit 0
