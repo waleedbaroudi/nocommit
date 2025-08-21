@@ -1,0 +1,39 @@
+# Binaries
+/dist/
+/bin/
+/build/
+/out/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Go build artifacts
+*.o
+*.a
+*.out
+
+# Coverage / test output
+*.cover
+*.cov
+*.coverage
+coverage.*
+/coverage.out
+
+# Logs
+*.log
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Dependency / vendoring
+/vendor/
+
+# Local config
+.env
