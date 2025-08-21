@@ -4,6 +4,7 @@ Copyright © 2025 Walid Baroudi wa.baroudi9@gmail.com
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -61,19 +62,16 @@ func setup() {
 	}
 }
 
+// embed the template (embedding to make sure it's accessible in tests and CI)
+//
+//go:embed assets/pre-commit
+var preCommitTemplate []byte
+
 func installHook(hooksDir string) {
-	src := filepath.Join("assets", "pre-commit")
 	dst := filepath.Join(hooksDir, "pre-commit")
-
-	data, err := os.ReadFile(src)
-	if err != nil {
-		fail("Read hook template", err, true)
-	}
-
-	if err := os.WriteFile(dst, data, 0755); err != nil {
+	if err := os.WriteFile(dst, preCommitTemplate, 0o755); err != nil {
 		fail("Write hook", err, true)
 	}
-
 }
 
 func fail(ctx string, err error, isFatal bool) {

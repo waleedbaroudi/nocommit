@@ -2,17 +2,26 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 )
+
+var errWriter io.Writer = os.Stderr
+
+func SetErrWriter(w io.Writer) {
+	if w != nil {
+		errWriter = w
+	}
+}
 
 func fail(ctx string, err error, isFatal bool) {
 	if err == nil {
 		return
 	}
-	fmt.Fprintf(os.Stderr, "❌ %s: %v\n", ctx, err)
+	fmt.Fprintf(errWriter, "❌ %s: %v\n", ctx, err)
 	if isFatal {
-		fmt.Fprintln(os.Stderr, "This was a fatal failure, please open an issue: https://github.com/waleedbaroudi/nocommit/issues")
+		fmt.Fprintln(errWriter, "This was a fatal failure, please open an issue: https://github.com/waleedbaroudi/nocommit/issues")
 		os.Exit(1)
 	}
-	fmt.Fprintln(os.Stderr, "If this keeps happening, please open an issue: https://github.com/waleedbaroudi/nocommit/issues")
+	fmt.Fprintln(errWriter, "If this keeps happening, please open an issue: https://github.com/waleedbaroudi/nocommit/issues")
 }

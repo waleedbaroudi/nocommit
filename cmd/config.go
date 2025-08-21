@@ -36,11 +36,12 @@ var configCmd = &cobra.Command{
 		}
 
 		// If only key provided → print value
+		writer := cmd.OutOrStdout()
 		if len(args) == 1 {
 			if val, ok := cfg[key]; ok {
-				fmt.Printf("%s: %v\n", key, val)
+				fmt.Fprintf(writer, "%s: %v\n", key, val)
 			} else {
-				fmt.Printf("%s not set\n", key)
+				fmt.Fprintf(writer, "%s not set\n", key)
 			}
 			return
 		}
@@ -59,7 +60,7 @@ var configCmd = &cobra.Command{
 			fail("Write config.yaml", err, true)
 			return
 		}
-		fmt.Printf("✅ Updated %s = %s\n", key, value)
+		fmt.Fprintf(writer, "✅ Updated %s = %s\n", key, value)
 	},
 }
 
@@ -80,11 +81,12 @@ var configListCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println(string(data))
+		w := cmd.OutOrStdout()
+		fmt.Fprintln(w, string(data))
 	},
 }
 
 func init() {
 	configCmd.AddCommand(configListCmd) // add "list" under "config"
-	rootCmd.AddCommand(configCmd)       // add "config" under root
+	RootCmd.AddCommand(configCmd)       // add "config" under root
 }

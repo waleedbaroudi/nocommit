@@ -8,7 +8,7 @@ import (
 var (
 	hookStart string
 	hookEnd   string
-	hookLine  string
+	HookLine  string
 	hookBlock string
 )
 
@@ -16,6 +16,6 @@ func init() {
 	hookStart = "# nocommit hook start"
 	hookEnd = "# nocommit hook end"
 	home, _ := os.UserHomeDir()
-	hookLine = filepath.Join(home, ".nocommit", "hooks", "pre-commit")
-	hookBlock = hookStart + "\n" + hookLine + "\n" + hookEnd + "\n"
+	HookLine = filepath.Join(home, ".nocommit", "hooks", "pre-commit")
+	hookBlock = hookStart + "\n" + HookLine + "\n" + hookEnd + "\n"
 }

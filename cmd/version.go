@@ -5,5 +5,5 @@ package cmd
 var Version = "dev"
 
 func init() {
-	rootCmd.Version = Version
+	RootCmd.Version = Version
 }

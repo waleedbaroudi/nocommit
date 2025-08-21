@@ -50,7 +50,7 @@ var disableCmd = &cobra.Command{
 
 // Returns true if the given text contains any part of the hook block
 func containsHook(text string) bool {
-	return strings.Contains(text, hookStart) || strings.Contains(text, hookLine) || strings.Contains(text, hookEnd)
+	return strings.Contains(text, hookStart) || strings.Contains(text, HookLine) || strings.Contains(text, hookEnd)
 }
 
 func removeHookBlock(content string) string {
@@ -69,5 +69,5 @@ func removeHookBlock(content string) string {
 }
 
 func init() {
-	rootCmd.AddCommand(disableCmd)
+	RootCmd.AddCommand(disableCmd)
 }

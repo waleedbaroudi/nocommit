@@ -19,17 +19,18 @@ var phrasesListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List phrases",
 	Run: func(cmd *cobra.Command, args []string) {
+		writer := cmd.OutOrStdout()
 		ps, err := readPhrases()
 		if err != nil {
 			fail("Read phrases", err, false)
 			return
 		}
 		if len(ps) == 0 {
-			fmt.Println("(no phrases)")
+			fmt.Fprintln(writer, "(no phrases)")
 			return
 		}
 		for _, p := range ps {
-			fmt.Println(p)
+			fmt.Fprintln(writer, p)
 		}
 	},
 }
@@ -39,9 +40,10 @@ var phrasesAddCmd = &cobra.Command{
 	Short: "Add a phrase",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		writer := cmd.OutOrStdout()
 		phrase := strings.TrimSpace(args[0])
 		if phrase == "" || strings.HasPrefix(phrase, "#") {
-			fmt.Println("❌ Invalid phrase")
+			fmt.Fprintln(writer, "❌ Invalid phrase")
 			_ = cmd.Usage()
 			return
 		}
@@ -52,7 +54,7 @@ var phrasesAddCmd = &cobra.Command{
 		}
 		for _, p := range ps {
 			if p == phrase {
-				fmt.Println("✅ Already exists")
+				fmt.Fprintln(writer, "✅ Already exists")
 				return
 			}
 		}
@@ -61,7 +63,7 @@ var phrasesAddCmd = &cobra.Command{
 			fail("Write phrases", err, false)
 			return
 		}
-		fmt.Printf("✅ Added '%s' to the list of block phrases", phrase)
+		fmt.Fprintf(writer, "✅ Added '%s' to the list of block phrases\n", phrase)
 	},
 }
 
@@ -70,6 +72,7 @@ var phrasesRemoveCmd = &cobra.Command{
 	Short: "Remove a phrase",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		writer := cmd.OutOrStdout()
 		target := strings.TrimSpace(args[0])
 		ps, err := readPhrases()
 		if err != nil {
@@ -86,20 +89,20 @@ var phrasesRemoveCmd = &cobra.Command{
 			out = append(out, p)
 		}
 		if !removed {
-			fmt.Println("⚠️ Not found")
+			fmt.Fprintln(writer, "⚠️ Not found")
 			return
 		}
 		if err := writePhrases(out); err != nil {
 			fail("Write phrases", err, false)
 			return
 		}
-		fmt.Printf("✅ Removed '%s' from the list of block phrases", target)
+		fmt.Fprintf(writer, "✅ Removed '%s' from the list of block phrases\n", target)
 	},
 }
 
 func init() {
 	phrasesCmd.AddCommand(phrasesListCmd, phrasesAddCmd, phrasesRemoveCmd)
-	rootCmd.AddCommand(phrasesCmd)
+	RootCmd.AddCommand(phrasesCmd)
 }
 
 // helpers

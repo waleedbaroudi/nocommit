@@ -30,7 +30,7 @@ var enableCmd = &cobra.Command{
 		content := ""
 		if b, err := os.ReadFile(hook); err == nil {
 			content = string(b)
-			if strings.Contains(content, hookLine) {
+			if strings.Contains(content, HookLine) {
 				fmt.Println("✅ nocommit already enabled for this repo.")
 				return
 			}
@@ -52,5 +52,5 @@ var enableCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(enableCmd)
+	RootCmd.AddCommand(enableCmd)
 }
