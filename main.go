@@ -50,7 +50,8 @@ func setup() {
 
 	if _, err := os.Stat(config); os.IsNotExist(err) {
 		firstRun = true
-		if err := os.WriteFile(config, []byte("version: 1\ncaseSensitive: false\n"), 0600); err != nil {
+		cfg := cmd.DefaultsConfig()
+		if err := cmd.SaveConfig(config, cfg); err != nil {
 			fail("Write config.yaml", err, false)
 		}
 	}
