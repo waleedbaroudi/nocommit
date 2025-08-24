@@ -1,6 +1,3 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -9,32 +6,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "nocommit",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Use:           "nocommit",
+	Short:         "Block commits containing forbidden phrases",
+	Long:          "nocommit installs a Git pre-commit hook that scans staged files for forbidden phrases (e.g., NOCOMMIT) and blocks the commit if found.",
+	SilenceErrors: true, 
+	// Version is set in version.go and injected at build time via -ldflags
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// Execute is called by main.main().
 func Execute() {
-	err := RootCmd.Execute()
-	if err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
-	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// Route our fail(...) helper to Cobra's error writer for every command
 	RootCmd.PersistentPreRun = func(cmd *cobra.Command, _ []string) {
 		SetErrWriter(cmd.ErrOrStderr())
 	}
