@@ -1,8 +1,19 @@
 #!/bin/sh
 
-RED="\033[31m"
-YELLOW="\033[33m"
-RESET="\033[0m"
+# Improved color detection for Windows compatibility
+if command -v tput >/dev/null 2>&1; then
+    RED=$(tput setaf 1)
+    YELLOW=$(tput setaf 3) 
+    RESET=$(tput sgr0)
+elif [ -t 1 ] && [ "$TERM" != "dumb" ]; then
+    RED="\033[31m"
+    YELLOW="\033[33m"
+    RESET="\033[0m"
+else
+    RED=""
+    YELLOW=""
+    RESET=""
+fi
 
 PHRASES_FILE="$HOME/.nocommit/phrases.txt"
 CONFIG_FILE="$HOME/.nocommit/config.yaml"
@@ -35,24 +46,40 @@ FILES=$(git diff --cached --name-only --diff-filter=ACM)
 # If no staged files, exit
 [ -z "$FILES" ] && exit 0
 
-# Read phrases
+# Read phrases and check for matches
+FOUND_MATCHES=0
+
 while IFS= read -r phrase; do
     # Skip empty lines and comments
     [ -z "$phrase" ] && continue
     case "$phrase" in \#*) continue ;; esac
 
-    # Search for matches
-    matches=$(grep -n -I $CASE_FLAG -E -- "$phrase" "$FILES" 2>/dev/null)
-    if [ -n "$matches" ]; then
-        echo "${RED}❌ Commit blocked: found '$phrase' in:${RESET}"
-        echo "$matches"
-        echo
-        echo "💡 Did you intend to commit this?"
-        echo "   - Check and adjust your settings with: nocommit config list/set"
-        echo "   - Modify block phrases with: nocommit phrases add/remove/list"
-        echo "   - Temporarily remove the phrase in your code"
-        exit 1
-    fi
+    # Search for matches in each file individually
+    for file in $FILES; do
+        matches=$(grep -n -I $CASE_FLAG -E -- "$phrase" "$file" 2>/dev/null)
+        if [ -n "$matches" ]; then
+            if [ $FOUND_MATCHES -eq 0 ]; then
+                echo "${RED}❌ Commit blocked: found blocked phrases:${RESET}"
+                FOUND_MATCHES=1
+            fi
+            
+            # Format output: filename:line:content
+            echo "$matches" | while IFS= read -r match; do
+                line_num=$(echo "$match" | cut -d: -f1)
+                content=$(echo "$match" | cut -d: -f2-)
+                echo "${RED}$file:$line_num:${RESET} $content"
+            done
+        fi
+    done
 done < "$PHRASES_FILE"
+
+if [ $FOUND_MATCHES -eq 1 ]; then
+    echo
+    echo "💡 Did you intend to commit this?"
+    echo "   - Check and adjust your settings with: nocommit config list/set"
+    echo "   - Modify block phrases with: nocommit phrases add/remove/list"
+    echo "   - Remove the phrase in your code"
+    exit 1
+fi
 
 exit 0
