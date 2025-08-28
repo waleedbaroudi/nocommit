@@ -1,5 +1,5 @@
 /*
-Copyright © 2025 Walid Baroudi wa.baroudi9@gmail.com
+Copyright © 2025 Walid Baroudi waleedbaroudi@hotmail.com
 */
 package main
 
